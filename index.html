@@ -15,10 +15,9 @@
         }
 
         body {
-            background: url('https://picsum.photos/1920/1080?blur=2') no-repeat center center fixed;
-            background-size: cover;
             min-height: 100vh;
             padding: 20px;
+            transition: background 0.3s ease;
         }
 
         /* 毛玻璃容器 - 兼容降级 */
@@ -32,6 +31,7 @@
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
 
         /* IE兼容：移除不支持的backdrop-filter，改用纯色 */
@@ -141,14 +141,31 @@
                 }
             }
         }
+
+        /* 管理入口 */
+        .admin-entrance {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            text-decoration: none;
+            color: #666;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- 管理入口 -->
+    <a href="admin.html" class="admin-entrance">管理后台</a>
+
+    <div class="container" id="mainContainer">
         <!-- Logo区域 -->
-        <div class="logo">
-            <img src="logo.png" alt="Logo">
-            <h1>我的极简导航</h1>
+        <div class="logo" id="logoContainer">
+            <img src="" alt="Logo" id="logoImg">
+            <h1 id="siteTitle">我的极简导航</h1>
         </div>
 
         <!-- 导航区域 -->
@@ -158,42 +175,50 @@
     </div>
 
     <script>
-        // 网站数据 - 你可以在这里自定义添加/修改链接
-        const websites = [
-            {
-                name: "百度",
-                url: "https://www.baidu.com",
-                icon: "https://www.baidu.com/favicon.ico"
-            },
-            {
-                name: "GitHub",
-                url: "https://github.com",
-                icon: "https://github.githubassets.com/favicons/favicon.ico"
-            },
-            {
-                name: "B站",
-                url: "https://www.bilibili.com",
-                icon: "https://static.hdslb.com/mobile/img/favicon.ico"
-            },
-            {
-                name: "知乎",
-                url: "https://www.zhihu.com",
-                icon: "https://static.zhihu.com/heifetz/favicon.ico"
-            },
-            {
-                name: "网易云音乐",
-                url: "https://music.163.com",
-                icon: "https://music.163.com/favicon.ico"
-            },
-            {
-                name: "淘宝",
-                url: "https://www.taobao.com",
-                icon: "https://img.alicdn.com/tfs/TB1NwmBEL9TBuNjy1zbXXXpepXa-64-64.ico"
-            }
-        ];
+        // 默认配置
+        const defaultConfig = {
+            siteTitle: "我的极简导航",
+            logoUrl: "https://picsum.photos/120/120",
+            backgroundUrl: "https://picsum.photos/1920/1080?blur=2",
+            containerOpacity: 0.2,
+            blurRadius: 10,
+            websites: [
+                { name: "百度", url: "https://www.baidu.com", icon: "https://www.baidu.com/favicon.ico" },
+                { name: "GitHub", url: "https://github.com", icon: "https://github.githubassets.com/favicons/favicon.ico" },
+                { name: "B站", url: "https://www.bilibili.com", icon: "https://static.hdslb.com/mobile/img/favicon.ico" }
+            ]
+        };
+
+        // 获取配置（优先localStorage，没有则用默认）
+        function getConfig() {
+            const savedConfig = localStorage.getItem('navConfig');
+            return savedConfig ? JSON.parse(savedConfig) : defaultConfig;
+        }
+
+        // 渲染页面
+        function renderPage() {
+            const config = getConfig();
+            
+            // 设置背景
+            document.body.style.background = `url('${config.backgroundUrl}') no-repeat center center fixed`;
+            document.body.style.backgroundSize = 'cover';
+            
+            // 设置容器透明度和模糊度
+            const container = document.getElementById('mainContainer');
+            container.style.background = `rgba(255, 255, 255, ${config.containerOpacity})`;
+            container.style.backdropFilter = `blur(${config.blurRadius}px)`;
+            container.style.webkitBackdropFilter = `blur(${config.blurRadius}px)`;
+            
+            // 设置Logo和标题
+            document.getElementById('logoImg').src = config.logoUrl;
+            document.getElementById('siteTitle').textContent = config.siteTitle;
+            
+            // 渲染导航项
+            renderNavItems(config.websites);
+        }
 
         // 动态生成导航项
-        function renderNavItems() {
+        function renderNavItems(websites) {
             const container = document.getElementById('navContainer');
             container.innerHTML = '';
 
@@ -206,7 +231,7 @@
                 link.target = '_blank'; // 新窗口打开
                 
                 const icon = document.createElement('img');
-                icon.src = site.icon;
+                icon.src = site.icon || "https://picsum.photos/40/40";
                 icon.alt = site.name;
                 
                 const name = document.createElement('span');
@@ -219,15 +244,15 @@
             });
         }
 
-        // 页面加载完成后渲染
-        window.onload = renderNavItems;
-
         // IE兼容：修复addEventListener
         if (!Element.prototype.addEventListener) {
             Element.prototype.addEventListener = function (event, func) {
                 this.attachEvent('on' + event, func);
             };
         }
+
+        // 页面加载完成后渲染
+        window.onload = renderPage;
     </script>
 </body>
 </html>
