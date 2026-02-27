@@ -1,5 +1,5 @@
 # Simple-Navigation-Station
-个人使用，AI编写
+个人使用，AI编写，小白常用软件收录
 
 # 简约导航网站 - 开发文档
 
